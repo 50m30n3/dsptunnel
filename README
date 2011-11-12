@@ -1,0 +1,47 @@
+dsptunnel v.1.0 by 50m30n3 2011
+
+Ever wanted to relive the carefree days of slow-as-fuck Internet?
+Miss the days of aborted downloads and half loaded porn images?
+
+Fret no more, your day has come!
+Using dsptunnel you can now surf the Internet at the blazing fast speed of
+nearly 3000 bytes per second. Thats almost 24 kilobits per second.
+And its full duplex!
+
+All you need are two computers with sound cards.
+Connect the line-out of your first machine with the line-in of your second
+machine and the line-out of your second machine with the line-in of the first.
+Set your levels so you get a loud and clear signal on both ends.
+Unity gain is best, so both playback and recording should be set to 0db.
+Also, you'll need a stereo link, otherwise it won't work since this baby uses
+differential signaling, if you know what I'm talking about.
+
+Now you need to create the TUNnel devices on both machines.
+As root on both machines:
+# ip tuntap add dev tun0 mode tun user <your user> group <your group>
+# ifconfig tun0 up
+
+As root on machine 1:
+# ifconfig tun0 10.0.0.1
+# ifconfig tun0 pointopoint 10.0.0.2
+
+As root on machine 2:
+# ifconfig tun0 10.0.0.2
+# ifconfig tun0 pointopoint 10.0.0.1
+
+Don't forget to put in your user name and group so dsptunnel can access the
+tunnel device without running as root (which would be a bad thing).
+Feel free to replace the IPs with addresses of your choice (yay, FREEDOM).
+
+Now simply run dsptunnel. If you don't have OSS run it using an OSS wrapper
+like aoss or padsp. Now ping the other machine. Now set up routing and
+enjoy your new slow Internet. And you can even listen to the bits.
+
+If you have a really good sound card that supports 96khz sample rate you can
+start dsptunnel with "-s 96000" to make use of it.
+If you get trasmission errors you can increase the bit length using the -b
+option. -t sets the name of the TUN device. -d sets the name of the dsp device.
+
+This software is licensed under the GNU GPL V3. See LICENSE for details.
+Send bugreports and questions to someone@d00m.org.
+
