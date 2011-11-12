@@ -5,6 +5,7 @@
 #include <limits.h>
 
 #include "dsptunnel.h"
+#include "fletcher.h"
 
 #include "output.h"
 
@@ -42,6 +43,7 @@ void *output_loop( void *inopts )
 	int i, j, k;
 
 	unsigned char data;
+	unsigned short int checksum;
 	int size;
 
 	short int lsample, rsample;
@@ -60,14 +62,19 @@ void *output_loop( void *inopts )
 	{
 		if( poll( &pollfd, 1, 0 ) )
 		{
-			size = read( opts.tundev, databuffer, DATABUFFERSIZE );
+			size = read( opts.tundev, databuffer, DATABUFFERSIZE-2 );
 			if( size == -1 )
 			{
 				perror( "output_loop: read" );
 				return NULL;
 			}
 
-			fprintf( stderr, "Packet out: %i bytes\n", size );
+			checksum = fletcher16( databuffer, size );
+			
+			databuffer[size++] = (checksum>>8)&0xff;
+			databuffer[size++] = checksum&0xff;
+
+			fprintf( stderr, "> %i bytes, checksum: 0x%04hX\n", size, checksum );
 
 			for( i=0; i<size; i++ )
 			{

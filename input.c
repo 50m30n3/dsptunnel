@@ -4,6 +4,7 @@
 #include <limits.h>
 
 #include "dsptunnel.h"
+#include "fletcher.h"
 
 #include "input.h"
 
@@ -39,6 +40,7 @@ void *input_loop( void *inopts )
 	struct threadopts opts = *(struct threadopts*)inopts;
 
 	unsigned char data;
+	unsigned short int checksum;
 	int size, bits;
 	
 	short int lsample, rsample;
@@ -129,13 +131,22 @@ void *input_loop( void *inopts )
 			silence++;
 			if( silence >= 8*opts.bitlength )
 			{
-				if( ( size > 0 ) && ( ! error ) )
+				if( ( size > 2 ) && ( ! error ) )
 				{
-					fprintf( stderr, "Packet in: %i bytes\n", size );
-
-					if( write( opts.tundev, databuffer, size ) != size )
+					checksum = fletcher16( databuffer, size-2 );
+					
+					fprintf( stderr, "< %i bytes, checksum: 0x%04hX (0x%04hX)\n", size, ((databuffer[size-2]<<8) | databuffer[size-1]), checksum );
+					
+					if( ((databuffer[size-2]<<8) | databuffer[size-1]) == checksum )
 					{
-						perror( "input_loop: write" );
+						if( write( opts.tundev, databuffer, size-2 ) != size-2 )
+						{
+							perror( "input_loop: write" );
+						}
+					}
+					else
+					{
+						fputs( "input_loop: incorrect checksum\n", stderr );
 					}
 				}
 
