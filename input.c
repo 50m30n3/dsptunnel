@@ -148,22 +148,29 @@ void *input_loop( void *inopts )
 			silence++;
 			if( silence >= 8*opts.bitlength )
 			{
-				if( ( size > 2 ) && ( ! error ) )
+				if( ( ! error ) && ( size > 0 ) )
 				{
-					checksum = fletcher16( databuffer, size-2 );
-					
-					fprintf( stderr, "> %i bytes, checksum: 0x%04hX (0x%04hX)\n", size, ((databuffer[size-2]<<8) | databuffer[size-1]), checksum );
-					
-					if( ((databuffer[size-2]<<8) | databuffer[size-1]) == checksum )
+					if( ( size > 2 ) && ( bits == 0 ) )
 					{
-						if( write( opts.tundev, databuffer, size-2 ) != size-2 )
+						checksum = fletcher16( databuffer, size-2 );
+				
+						fprintf( stderr, "> %i bytes, checksum: 0x%04hX (0x%04hX)\n", size, ((databuffer[size-2]<<8) | databuffer[size-1]), checksum );
+				
+						if( ((databuffer[size-2]<<8) | databuffer[size-1]) == checksum )
 						{
-							perror( "input_loop: write" );
+							if( write( opts.tundev, databuffer, size-2 ) != size-2 )
+							{
+								perror( "input_loop: write" );
+							}
+						}
+						else
+						{
+							fputs( "input_loop: incorrect checksum\n", stderr );
 						}
 					}
 					else
 					{
-						fputs( "input_loop: incorrect checksum\n", stderr );
+						fputs( "input_loop: invalid packet size\n", stderr );
 					}
 				}
 
