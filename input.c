@@ -152,7 +152,7 @@ void *input_loop( void *inopts )
 				{
 					checksum = fletcher16( databuffer, size-2 );
 					
-					fprintf( stderr, "< %i bytes, checksum: 0x%04hX (0x%04hX)\n", size, ((databuffer[size-2]<<8) | databuffer[size-1]), checksum );
+					fprintf( stderr, "> %i bytes, checksum: 0x%04hX (0x%04hX)\n", size, ((databuffer[size-2]<<8) | databuffer[size-1]), checksum );
 					
 					if( ((databuffer[size-2]<<8) | databuffer[size-1]) == checksum )
 					{

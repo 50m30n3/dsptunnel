@@ -91,7 +91,7 @@ void *output_loop( void *inopts )
 			databuffer[size++] = (checksum>>8)&0xff;
 			databuffer[size++] = checksum&0xff;
 
-			fprintf( stderr, "> %i bytes, checksum: 0x%04hX\n", size, checksum );
+			fprintf( stderr, "< %i bytes, checksum: 0x%04hX\n", size, checksum );
 
 			for( i=0; i<size; i++ )
 			{
