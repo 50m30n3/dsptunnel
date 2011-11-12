@@ -33,21 +33,25 @@ int main( int argc, char *argv[] )
 
 	char *tunname = NULL;
 	char *dspname = NULL;
+	int samplerate = 48000;
+	int bitlength = 2;
 
 	opterr = 0;
 
-	while( ( opt = getopt( argc, argv, "ht:d:" ) ) != -1 )
+	while( ( opt = getopt( argc, argv, "ht:d:s:b:" ) ) != -1 )
 	{
 		switch( opt )
 		{
 			case 'h':
 				puts( "dsptunnel v.1.0 by 50m30n3 2011" );
 				puts( "" );
-				puts( "USAGE: dsptunnel [-h] [-t tunif] [-d dspdev]" );
+				puts( "USAGE: dsptunnel [-h] [-t tunif] [-d dspdev] [-s samplerate] [-b bitlength]" );
 				puts( "" );
 				puts( "\t-h\t\tShow help" );
 				puts( "\t-t tunif\tSet name of tunnel interface (tun0)" );
 				puts( "\t-d dspdev\tSet name of dsp device (/dev/dsp)" );
+				puts( "\t-s sampelerate\tSet the sample rate (48000)" );
+				puts( "\t-b bitlength\tSet the length of one bit, in samples (2)" );
 				return EXIT_SUCCESS;
 			break;
 
@@ -57,6 +61,14 @@ int main( int argc, char *argv[] )
 			
 			case 'd':
 				dspname = strdup( optarg );
+			break;
+
+			case 's':
+				samplerate = atoi( optarg );
+			break;
+
+			case 'b':
+				bitlength = atoi( optarg );
 			break;
 
 			default:
@@ -73,11 +85,23 @@ int main( int argc, char *argv[] )
 	if( ! dspname )
 		dspname = strdup( "/dev/dsp" );
 
+	if( samplerate <= 0 )
+	{
+		fputs( "dsptunnel: main: Illegal sample rate\n", stderr );
+		return EXIT_FAILURE;
+	}
+
+	if( bitlength <= 0 )
+	{
+		fputs( "dsptunnel: main: Illegal bit length\n", stderr );
+		return EXIT_FAILURE;
+	}
+
 	tundev = tun_open( tunname );
 	if( tundev < 0 )
 		return EXIT_FAILURE;
 	
-	dspdev = dsp_open( dspname );
+	dspdev = dsp_open( dspname, samplerate );
 	if( dspdev < 0 )
 		return EXIT_FAILURE;
 
@@ -87,6 +111,7 @@ int main( int argc, char *argv[] )
 
 	opts.tundev = tundev;
 	opts.dspdev = dspdev;
+	opts.bitlength = bitlength;
 	opts.done = &done;
 
 	if( pthread_create( &inthread, NULL, input_loop, &opts ) != 0 )

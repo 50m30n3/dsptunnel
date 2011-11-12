@@ -3,9 +3,7 @@
 #include <sys/ioctl.h>
 #include <linux/soundcard.h>
 
-#define SAMPLERATE 48000
-
-int dsp_open( char *dspname )
+int dsp_open( char *dspname, int samplerate )
 {
 	int dev;
 	int arg;
@@ -43,14 +41,14 @@ int dsp_open( char *dspname )
 		return -1;
 	}
 
-	arg = SAMPLERATE;
+	arg = samplerate;
 	if( ioctl( dev, SNDCTL_DSP_SPEED, &arg ) == -1 )
 	{
 		perror( "dsp_open: ioctl: SNDCTL_DSP_SPEED" );
 		return -1;
 	}
 	
-	if( arg != SAMPLERATE )
+	if( arg != samplerate )
 	{
 		fputs( "dsp_open: Cannot set sample rate\n", stderr );
 		return -1;

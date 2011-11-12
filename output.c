@@ -9,11 +9,9 @@
 #include "output.h"
 
 #define DATABUFFERSIZE 2048
-
 static unsigned char databuffer[DATABUFFERSIZE];
 
 #define AUDIOBUFFERSIZE 1024*2
-
 static short int audiobuffer[AUDIOBUFFERSIZE];
 static int bufferpos;
 
@@ -41,7 +39,7 @@ void *output_loop( void *inopts )
 	
 	struct pollfd pollfd;
 
-	int i, j;
+	int i, j, k;
 
 	unsigned char data;
 	int size;
@@ -140,16 +138,16 @@ void *output_loop( void *inopts )
 						lsample = SHRT_MAX;
 						rsample = SHRT_MIN;
 					}
-				
-					if( ! audio_out( opts.dspdev, lsample, rsample ) )
-						return NULL;
 
-					if( ! audio_out( opts.dspdev, lsample, rsample ) )
-						return NULL;
+					for( k=0; k<opts.bitlength; k++ )
+					{
+						if( ! audio_out( opts.dspdev, lsample, rsample ) )
+							return NULL;
+					}
 				}
 			}
 
-			for( j=0; j<32; j++ )
+			for( i=0; i<16*opts.bitlength; i++ )
 			{
 				if( ! audio_out( opts.dspdev, 0, 0 ) )
 					return NULL;
@@ -157,8 +155,11 @@ void *output_loop( void *inopts )
 		}
 		else
 		{
-			if( ! audio_out( opts.dspdev, 0, 0 ) )
-				return NULL;
+			for( i=0; i<16*opts.bitlength; i++ )
+			{
+				if( ! audio_out( opts.dspdev, 0, 0 ) )
+					return NULL;
+			}
 		}
 	}
 

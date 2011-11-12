@@ -10,11 +10,9 @@
 #define THRESHOLD SHRT_MAX / 4
 
 #define DATABUFFERSIZE 2048
-
 static unsigned char databuffer[DATABUFFERSIZE];
 
 #define AUDIOBUFFERSIZE 1024*2
-
 static short int audiobuffer[AUDIOBUFFERSIZE];
 static int bufferpos;
 
@@ -129,7 +127,7 @@ void *input_loop( void *inopts )
 		else
 		{
 			silence++;
-			if( silence >= 16 )
+			if( silence >= 8*opts.bitlength )
 			{
 				if( ( size > 0 ) && ( ! error ) )
 				{

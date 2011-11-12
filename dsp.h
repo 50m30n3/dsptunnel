@@ -1,7 +1,7 @@
 #ifndef DSP_H
 #define DSP_H
 
-extern int dsp_open( char *dspname );
+extern int dsp_open( char *dspname, int samplerate );
 
 #endif
 

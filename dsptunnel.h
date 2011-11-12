@@ -5,6 +5,7 @@ struct threadopts
 {
 	int tundev;
 	int dspdev;
+	int bitlength;
 	volatile int *done;
 };
 
